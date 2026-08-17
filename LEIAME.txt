@@ -1,0 +1,21 @@
+FreeCell - versao para iPhone (e Android)
+=========================================
+
+O que ha aqui dentro
+  index.html ............. o jogo
+  sw.js .................. guarda o jogo no aparelho para funcionar sem internet
+  manifest.webmanifest ... nome, cores e icone do aplicativo
+  icon-*.png ............. icones da tela de inicio
+
+Como colocar no iPhone
+  1. Publique esta pasta inteira em qualquer hospedagem gratuita com HTTPS
+     (GitHub Pages, Cloudflare Pages, Netlify). Nao mude os nomes dos arquivos.
+  2. No iPhone, abra o endereco no Safari (precisa ser o Safari).
+  3. Toque em Compartilhar e depois em "Adicionar a Tela de Inicio".
+  4. Abra o icone uma vez ainda com internet: e nesse momento que o jogo
+     se copia para o aparelho.
+  5. A partir dai ele abre em tela cheia e funciona no modo aviao.
+
+Se voce alterar o jogo depois
+  Troque "freecell-v1" por "freecell-v2" na primeira linha do sw.js, publique
+  de novo e use o botao "Buscar atualizacao" dentro do painel Regras.
