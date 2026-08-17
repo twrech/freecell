@@ -19,3 +19,9 @@ Como colocar no iPhone
 Se voce alterar o jogo depois
   Troque "freecell-v1" por "freecell-v2" na primeira linha do sw.js, publique
   de novo e use o botao "Buscar atualizacao" dentro do painel Regras.
+
+Versao 1.1 (atualizacao)
+  Se voce ja publicou a versao anterior, basta reenviar dois arquivos ao
+  GitHub: index.html e sw.js. Os icones e o manifesto nao mudaram.
+  Depois abra o jogo no iPhone com internet e toque em Regras >
+  "Buscar atualizacao" para trocar a copia guardada no aparelho.

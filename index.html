@@ -6,7 +6,7 @@
 <title>FreeCell</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="FreeCell">
 <meta name="theme-color" content="#16302f">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -14,152 +14,220 @@
 <link rel="manifest" href="manifest.webmanifest">
 <style>
 :root{
-  --ink:#121a1d;
-  --table:#1f403d;
-  --deep:#0c1c1f;
-  --bone:#f7f2e7;
-  --brass:#c8a15a;
-  --red:#b3342b;
+  /* mesa noturna (padrao) */
+  --t1:#29524d; --t2:#1f403d; --t3:#163033; --t4:#0c1c1f;
+  --txt:#e9e3d5; --dim:rgba(233,227,213,.52);
+  --rule:rgba(200,161,90,.26);
+  --accent:#c8a15a;
+  --btn-bg:rgba(255,255,255,.04); --btn-line:rgba(200,161,90,.3); --btn-hot:rgba(200,161,90,.16);
+  --slot-line:rgba(247,242,231,.15); --slot-bg:rgba(0,0,0,.13); --slot-mark:rgba(247,242,231,.14);
+  --panel1:#1d3a38; --panel2:#132a2c;
+  --grain-a:rgba(255,255,255,.014); --grain-b:rgba(0,0,0,.03);
+  --shade:.40;
+
   --serif:"Hoefler Text","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
   --sans:ui-sans-serif,-apple-system,"Segoe UI Variable Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --red:#b3342b; --ink:#1a2125;
   --cw:76px; --ch:108px;
+}
+:root[data-mesa="classico"]{
+  --t1:#22855090; --t1:#237e4c; --t2:#186b3f; --t3:#0f5532; --t4:#093f25;
+  --grain-a:rgba(255,255,255,.02); --grain-b:rgba(0,0,0,.04);
+}
+:root[data-mesa="grafite"]{
+  --t1:#434950; --t2:#33383e; --t3:#24282d; --t4:#15181c;
+  --grain-a:rgba(255,255,255,.02); --grain-b:rgba(0,0,0,.035);
+}
+:root[data-mesa="dia"]{
+  --t1:#eaf1e5; --t2:#d3e2cf; --t3:#bcd4ba; --t4:#a7c5a7;
+  --txt:#1b2b24; --dim:rgba(27,43,36,.6);
+  --rule:rgba(27,43,36,.22);
+  --accent:#7d5f24;
+  --btn-bg:rgba(255,255,255,.55); --btn-line:rgba(27,43,36,.22); --btn-hot:rgba(125,95,36,.15);
+  --slot-line:rgba(27,43,36,.24); --slot-bg:rgba(0,0,0,.05); --slot-mark:rgba(27,43,36,.15);
+  --panel1:#f2f6ee; --panel2:#dfe9da;
+  --grain-a:rgba(255,255,255,.3); --grain-b:rgba(0,0,0,.018);
+  --shade:.22;
+}
+:root[data-mesa="areia"]{
+  --t1:#f3ebda; --t2:#e6dac2; --t3:#d6c7a9; --t4:#c3b18f;
+  --txt:#2a2317; --dim:rgba(42,35,23,.6);
+  --rule:rgba(42,35,23,.22);
+  --accent:#8a6a2f;
+  --btn-bg:rgba(255,255,255,.5); --btn-line:rgba(42,35,23,.22); --btn-hot:rgba(138,106,47,.16);
+  --slot-line:rgba(42,35,23,.24); --slot-bg:rgba(0,0,0,.05); --slot-mark:rgba(42,35,23,.15);
+  --panel1:#f6efe1; --panel2:#e6dac4;
+  --grain-a:rgba(255,255,255,.3); --grain-b:rgba(0,0,0,.018);
+  --shade:.22;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{
   font-family:var(--sans);
-  color:#e9e3d5;
+  color:var(--txt);
   background:
-    repeating-linear-gradient(45deg, rgba(255,255,255,.014) 0 2px, transparent 2px 4px),
-    repeating-linear-gradient(-45deg, rgba(0,0,0,.03) 0 2px, transparent 2px 4px),
-    radial-gradient(120% 90% at 50% -10%, #29524d 0%, var(--table) 42%, #163033 74%, var(--deep) 100%);
+    repeating-linear-gradient(45deg, var(--grain-a) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(-45deg, var(--grain-b) 0 2px, transparent 2px 4px),
+    radial-gradient(120% 90% at 50% -10%, var(--t1) 0%, var(--t2) 42%, var(--t3) 74%, var(--t4) 100%);
   background-attachment:fixed;
   overflow:hidden;overscroll-behavior:none;
   -webkit-user-select:none;user-select:none;
   -webkit-touch-callout:none;
   -webkit-tap-highlight-color:transparent;
   position:fixed;inset:0;
+  transition:color .2s;
 }
 .app{
   display:flex;flex-direction:column;height:100%;height:100dvh;
   max-width:1180px;margin:0 auto;
+  padding-left:env(safe-area-inset-left);
+  padding-right:env(safe-area-inset-right);
   padding-bottom:env(safe-area-inset-bottom);
 }
 
 /* ---------- trilho superior ---------- */
 .rail{
-  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
-  padding:calc(10px + env(safe-area-inset-top)) clamp(10px,2vw,22px) 11px;
-  padding-left:max(clamp(10px,2vw,22px), env(safe-area-inset-left));
-  padding-right:max(clamp(10px,2vw,22px), env(safe-area-inset-right));
-  border-bottom:1px solid rgba(200,161,90,.26);
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:calc(9px + env(safe-area-inset-top)) clamp(10px,2vw,22px) 10px;
+  border-bottom:1px solid var(--rule);
   box-shadow:0 1px 0 rgba(255,255,255,.04), 0 10px 22px -18px #000;
 }
 .deal{display:flex;align-items:baseline;gap:8px;flex:0 0 auto}
 .deal .lbl{
   font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;
-  color:rgba(233,227,213,.5);writing-mode:vertical-rl;transform:rotate(180deg);
+  color:var(--dim);writing-mode:vertical-rl;transform:rotate(180deg);
   line-height:1;padding-bottom:2px;
 }
 .deal input{
-  font-family:var(--serif);font-size:clamp(26px,4.4vw,38px);font-weight:600;
-  letter-spacing:.02em;color:var(--bone);background:transparent;border:0;
+  font-family:var(--serif);font-size:clamp(24px,4.2vw,36px);font-weight:600;
+  letter-spacing:.02em;color:var(--txt);background:transparent;border:0;
   border-bottom:1px solid transparent;width:4.6ch;padding:0 0 1px;
-  font-variant-numeric:tabular-nums;
+  font-variant-numeric:lining-nums tabular-nums;
+  font-feature-settings:"lnum" 1,"tnum" 1;
 }
-.deal input:hover{border-bottom-color:rgba(200,161,90,.4)}
-.deal input:focus{outline:none;border-bottom-color:var(--brass)}
+.deal input:hover{border-bottom-color:var(--btn-line)}
+.deal input:focus{outline:none;border-bottom-color:var(--accent)}
 .deal .nav{display:flex;flex-direction:column;gap:2px}
 .deal .nav button{
   width:20px;height:15px;line-height:1;font-size:9px;padding:0;
-  border:1px solid rgba(200,161,90,.28);background:transparent;color:rgba(233,227,213,.7);
+  border:1px solid var(--btn-line);background:transparent;color:var(--dim);
   border-radius:3px;cursor:pointer
 }
-.deal .nav button:hover{border-color:var(--brass);color:var(--bone)}
+.deal .nav button:hover{border-color:var(--accent);color:var(--txt)}
 
-.gauges{display:flex;gap:clamp(12px,2.4vw,26px);margin-left:auto}
-.gauge{text-align:right;min-width:56px}
-.gauge b{display:block;font-family:var(--mono);font-size:17px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--bone)}
-.gauge span{display:block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(233,227,213,.45);margin-top:2px}
+.gauges{display:flex;gap:clamp(12px,2.2vw,24px);margin-left:auto}
+.gauge{text-align:right;min-width:52px}
+.gauge b{display:block;font-family:var(--mono);font-size:16px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--txt)}
+.gauge span{display:block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-top:2px}
 
 .tools{display:flex;gap:6px;flex-wrap:wrap}
 button.pill{
   font-family:var(--sans);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
-  color:#e2dccd;background:rgba(255,255,255,.04);
-  border:1px solid rgba(200,161,90,.3);border-radius:999px;
-  padding:7px 13px;cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+  color:var(--txt);background:var(--btn-bg);
+  border:1px solid var(--btn-line);border-radius:999px;
+  padding:7px 13px;cursor:pointer;transition:background .15s,border-color .15s;
 }
-button.pill:hover:not(:disabled){background:rgba(200,161,90,.16);border-color:rgba(200,161,90,.65);color:#fff8e8}
-button.pill:disabled{opacity:.3;cursor:default}
-button.pill.primary{background:rgba(200,161,90,.18);border-color:rgba(200,161,90,.6)}
-:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+button.pill:hover:not(:disabled){background:var(--btn-hot);border-color:var(--accent)}
+button.pill:disabled{opacity:.32;cursor:default}
+button.pill.primary{background:var(--btn-hot);border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* ---------- mesa ---------- */
 #board{position:relative;flex:1;min-height:0;touch-action:none}
 .slot{
   position:absolute;width:var(--cw);height:var(--ch);
-  border:1px solid rgba(247,242,231,.15);
+  border:1px solid var(--slot-line);
   border-radius:calc(var(--cw)*.085);
-  background:rgba(0,0,0,.13);
-  box-shadow:inset 0 1px 6px rgba(0,0,0,.28);
+  background:var(--slot-bg);
+  box-shadow:inset 0 1px 6px rgba(0,0,0,.22);
   display:flex;align-items:center;justify-content:center;
   transition:border-color .15s, box-shadow .15s;
 }
-.slot .mark{font-family:var(--serif);font-size:calc(var(--cw)*.44);color:rgba(247,242,231,.13);line-height:1}
+.slot .mark{font-family:var(--serif);font-size:calc(var(--cw)*.44);color:var(--slot-mark);line-height:1}
 .slot .mark.tiny{font-family:var(--sans);font-size:calc(var(--cw)*.13);letter-spacing:.16em;text-transform:uppercase}
-.slot.col{box-shadow:inset 0 1px 6px rgba(0,0,0,.22);border-style:dashed;border-color:rgba(247,242,231,.11)}
-.slot.ok{border-color:rgba(200,161,90,.85);border-style:solid;box-shadow:inset 0 0 22px rgba(200,161,90,.14),0 0 0 1px rgba(200,161,90,.3)}
-.divider{position:absolute;height:1px;background:linear-gradient(90deg,transparent,rgba(200,161,90,.28),transparent)}
+.slot.col{border-style:dashed}
+.slot.ok{border-color:var(--accent);border-style:solid;box-shadow:inset 0 0 22px rgba(200,161,90,.16),0 0 0 1px var(--accent)}
+.divider{position:absolute;height:1px;background:linear-gradient(90deg,transparent,var(--rule),transparent)}
 
 /* ---------- cartas ---------- */
 .card{
   position:absolute;left:0;top:0;width:var(--cw);height:var(--ch);
   border-radius:calc(var(--cw)*.085);
-  background:linear-gradient(158deg,#fffdf7 0%,var(--bone) 46%,#eae1cf 100%);
-  box-shadow:inset 0 .5px 0 rgba(255,255,255,.7),0 1.5px 3px rgba(0,0,0,.32),0 12px 20px -12px rgba(0,0,0,.7);
+  background:linear-gradient(158deg,#f2ece0 0%,#e8e0ce 55%,#ddd4c0 100%);
+  box-shadow:
+    inset 0 .5px 0 rgba(255,255,255,.75),
+    0 -2px 5px -2px rgba(0,0,0,calc(var(--shade) * .9)),
+    0 2px 4px rgba(0,0,0,calc(var(--shade) * .8));
   transition:transform .18s cubic-bezier(.2,.7,.3,1);
   will-change:transform;
 }
+.card.topo{
+  background:linear-gradient(158deg,#fffdf8 0%,#f8f4ea 52%,#efe8d8 100%);
+  box-shadow:
+    inset 0 .5px 0 rgba(255,255,255,.9),
+    0 2px 5px rgba(0,0,0,calc(var(--shade) * .85)),
+    0 14px 22px -12px rgba(0,0,0,calc(var(--shade) * 1.5));
+}
 .card.red{color:var(--red)}
-.card.black{color:#1a2125}
-.card .ix{position:absolute;left:7%;top:4%;line-height:.94;text-align:center;font-family:var(--serif);font-weight:600}
-.card .ix .r{display:block;font-size:calc(var(--cw)*.33)}
-.card .ix .s{display:block;font-size:calc(var(--cw)*.235);margin-top:calc(var(--cw)*.03)}
-.card .big{position:absolute;right:7%;bottom:4%;font-size:calc(var(--cw)*.5);line-height:1;opacity:.92}
-.card.sel{box-shadow:0 0 0 2px var(--brass),0 2px 4px rgba(0,0,0,.35),0 16px 24px -12px rgba(0,0,0,.75)}
-.card.drag{transition:none;box-shadow:0 0 0 1px rgba(200,161,90,.5),0 22px 36px -14px rgba(0,0,0,.85)}
+.card.black{color:var(--ink)}
+/* indice numa unica linha: e a faixa que fica visivel quando a carta esta coberta */
+.card .ix{
+  position:absolute;left:6.5%;top:4%;
+  display:flex;align-items:center;gap:calc(var(--cw)*.055);
+  line-height:1;font-family:var(--serif);font-weight:600;
+  font-variant-numeric:lining-nums tabular-nums;
+  font-feature-settings:"lnum" 1,"tnum" 1;
+}
+.card .ix .r{font-size:calc(var(--cw)*.30)}
+.card .ix .s{font-size:calc(var(--cw)*.27)}
+.card .big{position:absolute;right:7%;bottom:5%;font-size:calc(var(--cw)*.5);line-height:1;opacity:.9}
+.card.sel,.card.drag{background:linear-gradient(158deg,#fffdf8 0%,#f8f4ea 52%,#efe8d8 100%)}
+.card.sel{box-shadow:0 0 0 2px var(--accent),0 3px 6px rgba(0,0,0,.4),0 16px 24px -12px rgba(0,0,0,.7)}
+.card.drag{transition:none;box-shadow:0 0 0 1px var(--accent),0 22px 36px -14px rgba(0,0,0,.85)}
 .card.deny{animation:deny .34s ease}
 @keyframes deny{50%{box-shadow:0 0 0 2px var(--red),0 12px 20px -12px rgba(0,0,0,.7)}}
 .card.hint,.slot.hint{animation:hint 1s ease 2}
-@keyframes hint{50%{box-shadow:0 0 0 3px rgba(200,161,90,.9),0 0 26px rgba(200,161,90,.35)}}
+@keyframes hint{50%{box-shadow:0 0 0 3px var(--accent),0 0 26px rgba(200,161,90,.4)}}
 
-/* ---------- painéis ---------- */
-.veil{position:fixed;inset:0;background:rgba(6,14,15,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9000;backdrop-filter:blur(3px)}
+/* ---------- paineis ---------- */
+.veil{position:fixed;inset:0;background:rgba(6,14,15,.6);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9000;backdrop-filter:blur(3px)}
 .veil[hidden]{display:none}
 .panel{
-  max-width:430px;width:100%;padding:26px 26px 22px;border-radius:4px;
-  background:linear-gradient(170deg,#1d3a38,#132a2c);
-  border:1px solid rgba(200,161,90,.4);
-  box-shadow:0 30px 70px -20px #000;
+  max-width:430px;width:100%;max-height:88vh;overflow:auto;padding:26px 26px 22px;border-radius:4px;
+  background:linear-gradient(170deg,var(--panel1),var(--panel2));
+  border:1px solid var(--accent);
+  box-shadow:0 30px 70px -20px rgba(0,0,0,.8);
 }
-.panel h2{font-family:var(--serif);font-size:27px;font-weight:600;letter-spacing:.01em;margin-bottom:6px}
-.panel .sub{font-size:12.5px;color:rgba(233,227,213,.62);line-height:1.6;margin-bottom:18px}
+.panel h2{font-family:var(--serif);font-size:26px;font-weight:600;margin-bottom:6px}
+.panel .sub{font-size:12.5px;color:var(--dim);line-height:1.6;margin-bottom:18px}
 .panel dl{display:grid;grid-template-columns:auto auto;gap:7px 14px;font-size:12.5px;margin-bottom:20px}
-.panel dt{color:rgba(233,227,213,.55)}
+.panel dt{color:var(--dim)}
 .panel dd{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
-.panel ul{list-style:none;font-size:12.5px;line-height:1.75;color:rgba(233,227,213,.8);margin-bottom:18px}
+.panel ul{list-style:none;font-size:12.5px;line-height:1.75;margin-bottom:18px}
 .panel ul li{padding-left:14px;position:relative}
-.panel ul li::before{content:"·";position:absolute;left:3px;color:var(--brass)}
-.panel kbd{font-family:var(--mono);font-size:10.5px;border:1px solid rgba(200,161,90,.35);border-radius:3px;padding:1px 5px;color:var(--bone)}
+.panel ul li::before{content:"\00b7";position:absolute;left:3px;color:var(--accent)}
+.panel kbd{font-family:var(--mono);font-size:10.5px;border:1px solid var(--btn-line);border-radius:3px;padding:1px 5px}
 .panel .row{display:flex;gap:8px;flex-wrap:wrap}
+.mesas{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.mesa{
+  display:flex;align-items:center;gap:11px;width:100%;text-align:left;cursor:pointer;
+  font-family:var(--sans);font-size:12.5px;color:var(--txt);
+  background:var(--btn-bg);border:1px solid var(--btn-line);border-radius:3px;padding:9px 12px;
+}
+.mesa:hover{background:var(--btn-hot)}
+.mesa[aria-current="true"]{border-color:var(--accent);background:var(--btn-hot)}
+.mesa[aria-current="true"]::after{content:"\2713";margin-left:auto;color:var(--accent)}
+.mesa .sw{width:24px;height:24px;border-radius:50%;flex:0 0 auto;
+  background:linear-gradient(155deg,var(--a),var(--b));box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
 .toast{
   position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
-  background:rgba(10,22,24,.94);border:1px solid rgba(200,161,90,.35);
+  background:var(--panel2);color:var(--txt);border:1px solid var(--btn-line);
   border-radius:999px;padding:8px 16px;font-size:12px;z-index:9500;
   opacity:0;transition:opacity .25s;pointer-events:none;
 }
 .toast.on{opacity:1}
+
 @media (max-width:620px){
   .rail{gap:10px;padding-bottom:9px}
   .deal .lbl{font-size:8.5px}
@@ -170,6 +238,21 @@ button.pill.primary{background:rgba(200,161,90,.18);border-color:rgba(200,161,90
   .tools{width:100%;gap:5px}
   button.pill{flex:1 1 auto;padding:9px 8px;font-size:9.5px;letter-spacing:.04em}
   .panel{padding:22px 20px 18px}
+}
+/* telas baixas (celular deitado): trilho de uma linha so */
+@media (max-height:520px){
+  .rail{gap:10px;padding-top:calc(5px + env(safe-area-inset-top));padding-bottom:5px;flex-wrap:nowrap}
+  .deal input{font-size:19px;width:4.4ch}
+  .deal .lbl{display:none}
+  .gauges{gap:12px}
+  .gauge{min-width:0}
+  .gauge b{font-size:13px}
+  .gauge span{font-size:7.5px;letter-spacing:.1em}
+  .tools{width:auto;gap:4px;margin-left:12px;flex-wrap:nowrap}
+  button.pill{flex:0 0 auto;padding:6px 9px;font-size:9px;letter-spacing:.03em}
+  .panel{padding:18px 20px 16px;max-height:92vh}
+  .panel h2{font-size:20px;margin-bottom:4px}
+  .panel .sub{margin-bottom:12px}
 }
 @media (prefers-reduced-motion:reduce){
   .card{transition:none}
@@ -201,6 +284,7 @@ button.pill.primary{background:rgba(200,161,90,.18);border-color:rgba(200,161,90
       <button class="pill" id="bRedo">Refazer</button>
       <button class="pill" id="bHint">Dica</button>
       <button class="pill" id="bRestart">Reiniciar</button>
+      <button class="pill" id="bMesa">Mesa</button>
       <button class="pill" id="bHelp">Regras</button>
     </div>
   </header>
@@ -250,7 +334,22 @@ button.pill.primary{background:rgba(200,161,90,.18);border-color:rgba(200,161,90
       <button class="pill primary" id="hClose">Voltar ao jogo</button>
       <button class="pill" id="bReload">Buscar atualização</button>
     </div>
-    <p class="sub" style="margin:14px 0 0;font-size:11px">Versão 1.0 &middot; funciona sem internet</p>
+    <p class="sub" style="margin:14px 0 0;font-size:11px">Versão 1.1 &middot; funciona sem internet</p>
+  </div>
+</div>
+
+<div class="veil" id="mesaVeil" hidden>
+  <div class="panel">
+    <h2>Cor da mesa</h2>
+    <p class="sub">Ao abrir, o jogo segue o modo claro ou escuro do aparelho. Aqui você escolhe outra pelo resto da sessão.</p>
+    <div class="mesas" id="mesas">
+      <button class="mesa" data-mesa="noite"><span class="sw" style="--a:#29524d;--b:#0c1c1f"></span>Feltro noturno</button>
+      <button class="mesa" data-mesa="classico"><span class="sw" style="--a:#237e4c;--b:#093f25"></span>Verde clássico</button>
+      <button class="mesa" data-mesa="grafite"><span class="sw" style="--a:#434950;--b:#15181c"></span>Grafite</button>
+      <button class="mesa" data-mesa="dia"><span class="sw" style="--a:#eaf1e5;--b:#a7c5a7"></span>Verde claro &mdash; para o dia</button>
+      <button class="mesa" data-mesa="areia"><span class="sw" style="--a:#f3ebda;--b:#c3b18f"></span>Areia &mdash; para o dia</button>
+    </div>
+    <div class="row"><button class="pill primary" id="mClose">Voltar ao jogo</button></div>
   </div>
 </div>
 
@@ -336,6 +435,7 @@ function safeToFound(c){
 
 /* ---------- medidas ---------- */
 var pendingLayout = false;
+var OFF_MIN = 0.30, OFF_MAX = 0.34, ROWGAP = 0.24, RATIO = 1.42, RATIO_MIN = 1.25;
 function layout(){
   var W = board.clientWidth, H = board.clientHeight;
   if(!W || !H){                       // mesa ainda sem medidas: tenta de novo
@@ -345,28 +445,33 @@ function layout(){
     }
     return;
   }
-  var pad = Math.max(8, Math.min(20, W * 0.016));
-  var gap = Math.max(5, Math.min(15, W * 0.013));
-  var cw  = (W - 2*pad - 7*gap) / 8;
-  var ch  = cw * 1.42;
-  var maxLen = 1;
-  for(var i = 0; i < 8; i++) if(S.cols[i].length > maxLen) maxLen = S.cols[i].length;
-  var rowGap = Math.max(9, Math.min(30, ch * 0.24));
-  var needed = 2*ch + rowGap + (maxLen - 1) * ch * 0.135 + 2*pad;
-  if(needed > H){
-    ch = (H - 2*pad) / (2 + 0.24 + 0.135 * (maxLen - 1));
-    cw = ch / 1.42;
-    rowGap = ch * 0.24;
-    gap = Math.min(gap, cw * 0.17);
-  }
-  var off = Math.min(ch * 0.30, (H - 2*pad - 2*ch - rowGap) / Math.max(1, maxLen - 1));
-  if(!isFinite(off) || off < ch * 0.13) off = ch * 0.13;
+  var i, maxLen = 1;
+  for(i = 0; i < 8; i++) if(S.cols[i].length > maxLen) maxLen = S.cols[i].length;
+
+  var padX = Math.max(6, Math.min(20, W * 0.016));
+  var padY = Math.max(5, Math.min(18, H * 0.022));
+  var gap  = Math.max(4, Math.min(15, W * 0.013));
+
+  // maior carta que cabe na largura; e maior que cabe na altura mantendo, em
+  // toda carta coberta, a faixa do indice (OFF_MIN) inteiramente visivel
+  var cwW = (W - 2*padX - 7*gap) / 8;
+  var chH = (H - 2*padY) / (2 + ROWGAP + OFF_MIN * (maxLen - 1));
+  var cw, ch;
+  if(RATIO * cwW <= chH){ cw = cwW; ch = RATIO * cw; }
+  else { ch = chH; cw = Math.min(cwW, ch / RATIO_MIN); }   // altura aperta: carta mais larga
+  if(ch < 44){ ch = Math.min(44, RATIO * cwW); cw = Math.min(cwW, ch / RATIO_MIN); }
+
+  gap = Math.max(gap, Math.min(cw * 0.24, (W - 2*padX - 8*cw) / 7));
+
+  var rowGap = ch * ROWGAP;
+  var off = (H - 2*padY - 2*ch - rowGap) / Math.max(1, maxLen - 1);
+  off = Math.max(ch * 0.16, Math.min(ch * OFF_MAX, off));
 
   L.cw = cw; L.ch = ch; L.gap = gap; L.off = off;
   L.padX = (W - (8*cw + 7*gap)) / 2;
-  L.topY = pad;
-  L.tabY = pad + ch + rowGap;
-  L.colH = Math.max(ch, H - L.tabY - pad);
+  L.topY = padY;
+  L.tabY = padY + ch + rowGap;
+  L.colH = Math.max(ch, H - L.tabY - padY);
 
   board.style.setProperty("--cw", cw + "px");
   board.style.setProperty("--ch", ch + "px");
@@ -447,9 +552,12 @@ function render(){
     e.style.display = "";
     e.style.transform = "translate3d(" + p.x + "px," + p.y + "px,0)";
     e.style.zIndex = p.z;
-    e.classList.remove("sel");
+    e.classList.remove("sel", "topo");
   }
-  if(sel) for(var i = 0; i < sel.cards.length; i++) els[sel.cards[i]].classList.add("sel");
+  for(var i = 0; i < 4; i++) if(S.free[i] !== null) els[S.free[i]].classList.add("topo");
+  for(var s = 0; s < 4; s++) if(S.found[s] > 0) els[(S.found[s]-1)*4 + s].classList.add("topo");
+  for(var j = 0; j < 8; j++) if(S.cols[j].length) els[S.cols[j][S.cols[j].length-1]].classList.add("topo");
+  if(sel) for(var k = 0; k < sel.cards.length; k++) els[sel.cards[k]].classList.add("sel");
   markTargets();
   $("gMoves").textContent = moves;
   $("gScore").textContent = victories + "/" + played;
@@ -925,7 +1033,8 @@ document.addEventListener("keydown", function(e){
   if(k === "n"){ $("bNew").click(); }
   else if(k === "r"){ $("bRestart").click(); }
   else if(k === "h"){ hint(); }
-  else if(k === "escape"){ $("helpVeil").hidden = true; $("winVeil").hidden = true; sel = null; render(); }
+  else if(k === "m"){ $("mesaVeil").hidden = !$("mesaVeil").hidden; }
+  else if(k === "escape"){ $("helpVeil").hidden = true; $("mesaVeil").hidden = true; $("winVeil").hidden = true; sel = null; render(); }
 });
 
 var rt = null;
@@ -933,6 +1042,25 @@ window.addEventListener("resize", function(){
   clearTimeout(rt);
   rt = setTimeout(function(){ if(won) return; layout(); render(); }, 120);
 });
+
+/* cor da mesa: comeca acompanhando o modo claro/escuro do aparelho */
+function setMesa(m){
+  document.documentElement.setAttribute("data-mesa", m);
+  var mt = document.querySelector('meta[name="theme-color"]');
+  if(mt) mt.setAttribute("content", getComputedStyle(document.documentElement).getPropertyValue("--t2").trim() || "#16302f");
+  var bs = document.querySelectorAll("#mesas .mesa");
+  for(var i = 0; i < bs.length; i++)
+    bs[i].setAttribute("aria-current", bs[i].getAttribute("data-mesa") === m ? "true" : "false");
+}
+(function(){
+  var bs = document.querySelectorAll("#mesas .mesa");
+  for(var i = 0; i < bs.length; i++)
+    bs[i].onclick = function(){ setMesa(this.getAttribute("data-mesa")); };
+  var claro = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches);
+  setMesa(claro ? "dia" : "noite");
+})();
+$("bMesa").onclick = function(){ $("mesaVeil").hidden = false; };
+$("mClose").onclick = function(){ $("mesaVeil").hidden = true; };
 
 newGame(1);
 

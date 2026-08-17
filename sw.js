@@ -1,5 +1,5 @@
 /* Guarda o jogo inteiro no aparelho para que ele abra sem internet. */
-const CACHE = "freecell-v1";
+const CACHE = "freecell-v2";
 const ARQUIVOS = [
   "./",
   "./index.html",
